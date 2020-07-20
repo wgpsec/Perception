@@ -10,14 +10,15 @@
 
 # Use
 
-首先需要我们安装几个第三方库：
-
-```python
-pip install requests
-pip install demjson
-pip insatll argparse
+安装第三方依赖：
+```bash
+pip install -r requirements.txt
 ```
-
+如果安装demjson比较耗时可通过镜像：
+```bash
+pip install -r requirements.txt -i https://pypi.douban.com/simple
+```
+  
 第一次使用需要输入一下社区的`cookie`，可以先输入 `--help`进行添加,，然后会在当前的目录下生成一个`cookies.txt`文件。下面是使用的一些参数：
 
 ```
