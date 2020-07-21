@@ -18,7 +18,7 @@ pip install -r requirements.txt
 ```bash
 pip install -r requirements.txt -i https://pypi.douban.com/simple
 ```
-  
+
 第一次使用需要输入一下社区的`cookie`，可以先输入 `--help`进行添加,，然后会在当前的目录下生成一个`cookies.txt`文件。下面是使用的一些参数：
 
 ```
@@ -49,9 +49,9 @@ optional arguments:
 在未来的开发中，会逐渐完善以下功能：
 
 - ~~查看基本的域名信息~~
-- 查找对应的指纹和服务
+- ~~查找对应的指纹和服务~~
 - 查找开放的常见端口
-- 和[知识库](https://plat.wgpsec.org/knowledge)对接，便于查看对应的指纹POC和文献啥
+- ~~和[知识库](https://plat.wgpsec.org/knowledge)对接，便于查看对应的指纹POC和文献~~
 - ......
 
 
