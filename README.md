@@ -38,7 +38,7 @@ optional arguments:
 
 # eg
 
-`python test.py --c 成都`
+`python test.py --c 上海`
 
 ![image-20200721181428197](demo.png)
 
