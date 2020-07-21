@@ -40,7 +40,7 @@ optional arguments:
 
 `python test.py --c 成都`
 
-![image-20200720204756131](demo.png)
+![image-20200721181428197](demo.png)
 
 目前仅支持域名的查找，后续功能会逐渐添加
 
