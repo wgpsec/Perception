@@ -72,7 +72,7 @@ swagger：https://dev.c.loongten.com/swagger-ui.html#/ws-search-controller/getWs
 
 
 
-目前第一版：https://github.com/wgpsec/Perception
+目前最新版：https://github.com/wgpsec/Perception
 
 ## 要求能做到的功能
 
