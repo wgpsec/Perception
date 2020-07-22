@@ -23,7 +23,9 @@ pip install -r requirements.txt
 pip install -r requirements.txt -i https://pypi.douban.com/simple
 ```
 
-第一次使用需要输入一下社区的`cookie` 和`pageSize`，可以先输入 `--help`进行添加,，然后会在当前的目录下生成`cookies.txt`和`setting`文件。下面是使用的一些参数：
+## 第一次使用
+
+第一次需要登录你的账户，如果你是社区用户，那么我建议最大的查询数量为99，如果账户没有限制的话就想多少就多少，然后会在当前的目录下生成`user_token.txt`和`pageSize.txt`文件，分别存储用户信息，和用户自定义的设置，下面是使用的一些参数：
 
 ```
 usage: test.py [-h] [--c C] [--h H] [--t T] [--p P]
@@ -56,7 +58,7 @@ optional arguments:
 - ~~查找对应的指纹和服务~~
 - 查找开放的常见端口
 - ~~和[知识库](https://plat.wgpsec.org/knowledge)对接，便于查看对应的指纹POC和文献~~
-- ......
+- 自定义输出方式，默认输出是在命令行中，查询完成以后会按照查询时间进行保存，格式为.xls，未来会增加选项，是否输出到命令行。
 
 
 
