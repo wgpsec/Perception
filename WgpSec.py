@@ -111,7 +111,7 @@ if pageSize_txt == False:
         f.close()
 else:
     print('token验证成功')
-    with open('pageSiza.txt', 'r+') as f:
+    with open('pageSize.txt', 'r+') as f:
         pageSize = int(f.read())
         f.close()
     if int(pageSize) > 99:
@@ -558,7 +558,7 @@ class Search(object):
             print('当前库中只有%s条数据！' %i)
 
         finally:
-            print('网站标题为：%s 查询成功'%title)
+            print('网站标题为："%s" 查询成功'%title)
 
     # 端口查询
     def port(self,port):
