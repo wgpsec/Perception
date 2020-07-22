@@ -43,38 +43,94 @@ parser.add_argument("--t", type=str,help="查询网站标题")
 parser.add_argument("--p", type=str,help="查询开放特定端口")
 args = parser.parse_args()
 
-#判断cookie
-
+# 获取当前路径
 path = os.getcwd()
-cookie_txt = os.path.exists('cookies.txt')
-setting_txt = os.path.exists('setting.txt')
-if cookie_txt == False:
-    with open('cookies.txt','w') as f:
-        cookies_input = input('你还没有cookie，请先输入你的cookie值：')
-        f.write(cookies_input)
+user_token_txt = os.path.exists('user_token.txt')
+pageSize_txt = os.path.exists('pageSize.txt')
+
+#  创建用户token存放
+if user_token_txt == False:
+    with open('user_token.txt','w') as f:
         f.close()
 else:
     pass
 
+# 判断cookie是否生效
+with open('user_token.txt','r+') as f:
+    cookies_read = f.read()
+    f.close()
+# 请求头
+header = {
+    "authorization": cookies_read,
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"
+    }
+yz_json = {
+"pageNo": 1,
+"pageSize": 20,
+"query": "city=上海",
+"type": "web"
+}
+yz = requests.post('https://plat.wgpsec.org/api/v1/ws/search', headers=header,json=yz_json)
+yz_return = demjson.decode(yz.text)
+# 开始验证
+if int(yz_return['code']) == 2000:
+    print('token验证成功')
+else:
+    if int(yz_return['code']) == 4001 or int(yz_return['code'] == 4018):
+        print('未登录或者登录超时，请重新登录！')
+        user_name = input('输入你的账号：')
+        user_passwd = input('输入你的密码：')
+        # 登录获取token
+        login_json = {
+            "userName": user_name,
+            "userPassword": user_passwd,
+            "captcha": "dqdq",
+            "type": 0
+        }
+        login_api = 'https://plat.wgpsec.org/api/user/passwordLogin'
+        login_api_return = requests.post(login_api,json=login_json)
+        login_api_return_json = demjson.decode(login_api_return.text)
+        login_token = login_api_return_json['data']['token']
+
+        if int(login_api_return_json['code']) == 5001:
+            print('密码或用户名错误，重新登录')
+        elif int(login_api_return_json['code']) == 2000:
+            # 写入cookie
+            print('token验证成功！')
+            with open('user_token.txt', 'w') as f:
+                f.write(login_token)
+                f.close()
+    else:
+        print('token验证成功！')
+
 # 设置查询条数
-if setting_txt == False:
-    with open('setting.txt','w') as f:
+if pageSize_txt == False:
+    with open('pageSize.txt','w') as f:
         setting_input = input('输入你想查询的默认条数：')
         f.write(setting_input)
         f.close()
 else:
-    pass
+    print('token验证成功')
+    with open('pageSiza.txt', 'r+') as f:
+        pageSize = int(f.read())
+        f.close()
+    if int(pageSize) > 99:
+        print('查询的条数超过100，请手动修改setting.txt文件，建议改为99，避免出错')
+        sys.exit()
+    else:
+        print('success!')
 
-with open('cookies.txt','r+') as f:
+# 读取cookies文件
+with open('user_token.txt','r+') as f:
     cookies_read = f.read()
     f.close()
 
-with open('setting.txt','r+') as f:
+# 读取配置文件
+with open('pageSize.txt','r+') as f:
     pageSize = int(f.read())
     f.close()
 
-
-
+# 主要程序
 class Search(object):
 
     def __init__(self):
@@ -82,15 +138,16 @@ class Search(object):
 
     # 城市查询
     def city(self,city):
-        Search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
+        search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
         knowledge_api_url = 'https://plat.wgpsec.org/api/post/queryPlatPost' # 知识库api链接
         key = ['id', 'subdomain', 'ipAdd', 'host', 'cdn', 'city', 'status', 'dnsType', 'subdomainLevel',
                'subdomainTitle',
                'subdomainBanner', 'subdomainReason', 'subdomainStatus', 'addTime', 'wsUrlsInfoDto']
         header = {
-            "Cookie":cookies_read
+            "authorization":cookies_read,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"
         }
-        Search_json = {
+        search_json = {
             "pageNo": 1,
             "pageSize": pageSize,
             "query": "city=%s" %city,
@@ -98,17 +155,17 @@ class Search(object):
                         }
 
 
-        Search_api_return = requests.post(Search_api_url, headers=header, json=Search_json)
-        Search_api_return_json = demjson.decode(Search_api_return.text)
+        search_api_return = requests.post(search_api_url, headers=header, json=search_json)
+        search_api_return_json = demjson.decode(search_api_return.text)
 
         # json 返回值里面会有3个key分别是：code、msg、data
-        Search_api_data = Search_api_return_json['data']  # 提取返回中的data值
+        search_api_data = search_api_return_json['data']  # 提取返回中的data值
 
         # data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
 
         # wsPortInfoDtoList = api_data['wsPortInfoDtoList']
 
-        wsSubDomainInfoDtoList = Search_api_data['wsSubDomainInfoDtoList']
+        wsSubDomainInfoDtoList = search_api_data['wsSubDomainInfoDtoList']
 
         # wsSubDomainInfoDtoList中有5个key，分别是wsSubDomainInfoDtos、pageSize、totalCount、pageNo、pages。所有的域名信息都在wsSubDomainInfoDtos里面，包括子域名
         wsSubDomainInfoDtos = wsSubDomainInfoDtoList['wsSubDomainInfoDtos']  # 查询出的域名和子域，列表的形式出来的，所以下方使用下标
@@ -151,7 +208,7 @@ class Search(object):
                         else:
                             new_word = key_word[0:del_word]
 
-                        Knowledge_json = {
+                        knowledge_json = {
                             "pageNo": 1,
                             "pageSize": 12,
                             "platPostDto": {
@@ -159,10 +216,10 @@ class Search(object):
                             "categoryId": ""
                         }
                         }
-                        Knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=Knowledge_json)
-                        Knowledge_api_return_json = demjson.decode(Knowledge_api_return.text)
-                        Knowledge_api_data = Knowledge_api_return_json['data']
-                        platPostSVos = Knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
+                        knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=knowledge_json)
+                        knowledge_api_return_json = demjson.decode(knowledge_api_return.text)
+                        knowledge_api_data = knowledge_api_return_json['data']
+                        platPostSVos = knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
                         knowledge_size = len(platPostSVos)
                         n = 0
                         while n < knowledge_size:
@@ -231,15 +288,15 @@ class Search(object):
 
     # 域名查询
     def host(self,host):
-        Search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
+        search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
         knowledge_api_url = 'https://plat.wgpsec.org/api/post/queryPlatPost' # 知识库api链接
         key = ['id', 'subdomain', 'ipAdd', 'host', 'cdn', 'city', 'status', 'dnsType', 'subdomainLevel',
                'subdomainTitle',
                'subdomainBanner', 'subdomainReason', 'subdomainStatus', 'addTime', 'wsUrlsInfoDto']
         header = {
-            "Cookie":cookies_read
+            "authorization":cookies_read
         }
-        Search_json = {
+        search_json = {
             "pageNo": 1,
             "pageSize": pageSize,
             "query": "ip=%s" %host,
@@ -247,10 +304,10 @@ class Search(object):
                         }
 
 
-        Search_api_return = requests.post(Search_api_url, headers=header, json=Search_json)
-        Search_api_return_json = demjson.decode(Search_api_return.text)
-        Search_api_data = Search_api_return_json['data']  # json 返回值里面会有3个key分别是：code、msg、data提取返回中的data值
-        wsSubDomainInfoDtoList = Search_api_data['wsSubDomainInfoDtoList']# data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
+        search_api_return = requests.post(search_api_url, headers=header, json=search_json)
+        search_api_return_json = demjson.decode(search_api_return.text)
+        search_api_data = search_api_return_json['data']  # json 返回值里面会有3个key分别是：code、msg、data提取返回中的data值
+        wsSubDomainInfoDtoList = search_api_data['wsSubDomainInfoDtoList']# data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
         wsSubDomainInfoDtos = wsSubDomainInfoDtoList['wsSubDomainInfoDtos']  # 查询出的域名和子域，列表的形式出来的，所以下方使用下标， # wsSubDomainInfoDtoList中有5个key，分别是wsSubDomainInfoDtos、pageSize、totalCount、pageNo、pages。所有的域名信息都在wsSubDomainInfoDtos里面，包括子域名
         i = 0
         try:
@@ -291,7 +348,7 @@ class Search(object):
                         else:
                             new_word = key_word[0:del_word]
 
-                        Knowledge_json = {
+                        knowledge_json = {
                             "pageNo": 1,
                             "pageSize": 12,
                             "platPostDto": {
@@ -299,10 +356,10 @@ class Search(object):
                             "categoryId": ""
                         }
                         }
-                        Knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=Knowledge_json)
-                        Knowledge_api_return_json = demjson.decode(Knowledge_api_return.text)
-                        Knowledge_api_data = Knowledge_api_return_json['data']
-                        platPostSVos = Knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
+                        knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=knowledge_json)
+                        knowledge_api_return_json = demjson.decode(knowledge_api_return.text)
+                        knowledge_api_data = knowledge_api_return_json['data']
+                        platPostSVos = knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
                         knowledge_size = len(platPostSVos)
                         n = 0
                         while n < knowledge_size:
@@ -370,24 +427,24 @@ class Search(object):
 
     # 标题查询
     def title(self,title):
-        Search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
+        search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
         knowledge_api_url = 'https://plat.wgpsec.org/api/post/queryPlatPost' # 知识库api链接
         key = ['id', 'subdomain', 'ipAdd', 'host', 'cdn', 'city', 'status', 'dnsType', 'subdomainLevel',
                'subdomainTitle',
                'subdomainBanner', 'subdomainReason', 'subdomainStatus', 'addTime', 'wsUrlsInfoDto']
         header = {
-            "Cookie":cookies_read
+            "authorization":cookies_read
         }
-        Search_json = {
+        search_json = {
             "pageNo": 1,
             "pageSize": pageSize,
             "query": "title=%s" %title,
             "type": "web"
                         }
-        Search_api_return = requests.post(Search_api_url, headers=header, json=Search_json)
-        Search_api_return_json = demjson.decode(Search_api_return.text)
-        Search_api_data = Search_api_return_json['data']  # json 返回值里面会有3个key分别是：code、msg、data，提取返回中的data值
-        wsSubDomainInfoDtoList = Search_api_data['wsSubDomainInfoDtoList'] # data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
+        search_api_return = requests.post(search_api_url, headers=header, json=search_json)
+        search_api_return_json = demjson.decode(search_api_return.text)
+        search_api_data = search_api_return_json['data']  # json 返回值里面会有3个key分别是：code、msg、data，提取返回中的data值
+        wsSubDomainInfoDtoList = search_api_data['wsSubDomainInfoDtoList'] # data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
         wsSubDomainInfoDtos = wsSubDomainInfoDtoList['wsSubDomainInfoDtos']  # wsSubDomainInfoDtoList中有5个key，分别是wsSubDomainInfoDtos、pageSize、totalCount、pageNo、pages。所有的域名信息都在wsSubDomainInfoDtos里面，包括子域名查询出的域名和子域，列表的形式出来的，所以下方使用下标
 
         i = 0
@@ -427,7 +484,7 @@ class Search(object):
                         else:
                             new_word = key_word[0:del_word]
 
-                        Knowledge_json = {
+                        knowledge_json = {
                             "pageNo": 1,
                             "pageSize": 12,
                             "platPostDto": {
@@ -435,10 +492,10 @@ class Search(object):
                             "categoryId": ""
                         }
                         }
-                        Knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=Knowledge_json)
-                        Knowledge_api_return_json = demjson.decode(Knowledge_api_return.text)
-                        Knowledge_api_data = Knowledge_api_return_json['data']
-                        platPostSVos = Knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
+                        knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=Knowledge_json)
+                        knowledge_api_return_json = demjson.decode(knowledge_api_return.text)
+                        knowledge_api_data = knowledge_api_return_json['data']
+                        platPostSVos = knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
                         knowledge_size = len(platPostSVos)
                         n = 0
                         while n < knowledge_size:
@@ -505,15 +562,15 @@ class Search(object):
 
     # 端口查询
     def port(self,port):
-        Search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
+        search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
         knowledge_api_url = 'https://plat.wgpsec.org/api/post/queryPlatPost' # 知识库api链接
         key = ['id', 'subdomain', 'ipAdd', 'host', 'cdn', 'city', 'status', 'dnsType', 'subdomainLevel',
                'subdomainTitle',
                'subdomainBanner', 'subdomainReason', 'subdomainStatus', 'addTime', 'wsUrlsInfoDto']
         header = {
-            "Cookie":cookies_read
+            "authorization":cookies_read
         }
-        Search_json = {
+        search_json = {
             "pageNo": 1,
             "pageSize": pageSize,
             "query": "port=%s" %port,
@@ -521,10 +578,10 @@ class Search(object):
                         }
 
 
-        Search_api_return = requests.post(Search_api_url, headers=header, json=Search_json)
-        Search_api_return_json = demjson.decode(Search_api_return.text)
-        Search_api_data = Search_api_return_json['data']  # json 返回值里面会有3个key分别是：code、msg、data提取返回中的data值
-        wsSubDomainInfoDtoList = Search_api_data['wsSubDomainInfoDtoList']# data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
+        search_api_return = requests.post(search_api_url, headers=header, json=search_json)
+        search_api_return_json = demjson.decode(search_api_return.text)
+        search_api_data = search_api_return_json['data']  # json 返回值里面会有3个key分别是：code、msg、data提取返回中的data值
+        wsSubDomainInfoDtoList = search_api_data['wsSubDomainInfoDtoList']# data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
         wsSubDomainInfoDtos = wsSubDomainInfoDtoList['wsSubDomainInfoDtos']  # 查询出的域名和子域，列表的形式出来的，所以下方使用下标，wsSubDomainInfoDtoList中有5个key，分别是wsSubDomainInfoDtos、pageSize、totalCount、pageNo、pages。所有的域名信息都在wsSubDomainInfoDtos里面，包括子域名
         i = 0
         try:
@@ -532,7 +589,9 @@ class Search(object):
                 #
                 if wsSubDomainInfoDtos[i]['subdomainTitle'] == 'Not Found':
                     print('无法访问\n'
-                          '域名： %s' % wsSubDomainInfoDtos[i]['subdomain'])
+                          '域名： %s' % wsSubDomainInfoDtos[i]['subdomain']
+                          )
+
                     ws.write(i,0, '无法访问')
                     ws.write(i,2, wsSubDomainInfoDtos[i]['subdomain'])
                     ws.write(i,3, wsSubDomainInfoDtos[i]['ipAdd'])
@@ -563,7 +622,7 @@ class Search(object):
                         else:
                             new_word = key_word[0:del_word]
 
-                        Knowledge_json = {
+                        knowledge_json = {
                             "pageNo": 1,
                             "pageSize": 12,
                             "platPostDto": {
@@ -571,10 +630,10 @@ class Search(object):
                             "categoryId": ""
                         }
                         }
-                        Knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=Knowledge_json)
-                        Knowledge_api_return_json = demjson.decode(Knowledge_api_return.text)
-                        Knowledge_api_data = Knowledge_api_return_json['data']
-                        platPostSVos = Knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
+                        knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=knowledge_json)
+                        knowledge_api_return_json = demjson.decode(knowledge_api_return.text)
+                        knowledge_api_data = knowledge_api_return_json['data']
+                        platPostSVos = knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
                         knowledge_size = len(platPostSVos)
                         n = 0
                         while n < knowledge_size:
@@ -641,15 +700,15 @@ class Search(object):
 
 
     def ip_port(self,ip,port):
-        Search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
+        search_api_url = 'https://plat.wgpsec.org/api/v1/ws/search' # 搜索模块api链接
         knowledge_api_url = 'https://plat.wgpsec.org/api/post/queryPlatPost' # 知识库api链接
         key = ['id', 'subdomain', 'ipAdd', 'host', 'cdn', 'city', 'status', 'dnsType', 'subdomainLevel',
                'subdomainTitle',
                'subdomainBanner', 'subdomainReason', 'subdomainStatus', 'addTime', 'wsUrlsInfoDto']
         header = {
-            "Cookie":cookies_read
+            "authorization":cookies_read
         }
-        Search_json = {
+        search_json = {
             "pageNo": 1,
             "pageSize": pageSize,
             "query": "ip=%s|port=%s" %(ip,port),
@@ -657,17 +716,17 @@ class Search(object):
                         }
 
 
-        Search_api_return = requests.post(Search_api_url, headers=header, json=Search_json)
-        Search_api_return_json = demjson.decode(Search_api_return.text)
+        search_api_return = requests.post(search_api_url, headers=header, json=search_json)
+        search_api_return_json = demjson.decode(search_api_return.text)
 
         # json 返回值里面会有3个key分别是：code、msg、data
-        Search_api_data = Search_api_return_json['data']  # 提取返回中的data值
+        search_api_data = search_api_return_json['data']  # 提取返回中的data值
 
         # data下面有wsDomainInfoDto、wsSubDomainInfoDtoList、wsPortInfoDtoList、wsUrlsInfoDtoList 目前只有wsSubDomainInfoDtoList存在可用信息，其他返回值为null，所以其他的参数不写
 
         # wsPortInfoDtoList = api_data['wsPortInfoDtoList']
 
-        wsSubDomainInfoDtoList = Search_api_data['wsSubDomainInfoDtoList']
+        wsSubDomainInfoDtoList = search_api_data['wsSubDomainInfoDtoList']
 
         # wsSubDomainInfoDtoList中有5个key，分别是wsSubDomainInfoDtos、pageSize、totalCount、pageNo、pages。所有的域名信息都在wsSubDomainInfoDtos里面，包括子域名
         wsSubDomainInfoDtos = wsSubDomainInfoDtoList['wsSubDomainInfoDtos']  # 查询出的域名和子域，列表的形式出来的，所以下方使用下标
@@ -707,7 +766,7 @@ class Search(object):
                         else:
                             new_word = key_word[0:del_word]
 
-                        Knowledge_json = {
+                        knowledge_json = {
                             "pageNo": 1,
                             "pageSize": 12,
                             "platPostDto": {
@@ -715,10 +774,10 @@ class Search(object):
                             "categoryId": ""
                         }
                         }
-                        Knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=Knowledge_json)
-                        Knowledge_api_return_json = demjson.decode(Knowledge_api_return.text)
-                        Knowledge_api_data = Knowledge_api_return_json['data']
-                        platPostSVos = Knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
+                        knowledge_api_return = requests.post(knowledge_api_url,headers=header,json=knowledge_json)
+                        knowledge_api_return_json = demjson.decode(knowledge_api_return.text)
+                        knowledge_api_data = knowledge_api_return_json['data']
+                        platPostSVos = knowledge_api_data['platPostSVos'] # 取的返回值的文章详情页面
                         knowledge_size = len(platPostSVos)
                         n = 0
                         while n < knowledge_size:
@@ -781,6 +840,7 @@ class Search(object):
 
         finally:
             print('查询的IP为：%s、端口为：%s 查询成功' % (ip,port))
+            sys.exit()
 
 
 
@@ -789,25 +849,21 @@ class Search(object):
 if args.c:
     city_ = Search()
     city_.city(args.c)
-
-if args.h:
+elif args.h:
     if args.h == '127.0.0.1':
         print('输入的是局域网地址，无法查询')
     else:
         host_ = Search()
         host_.host(args.h)
-
-if args.t:
+elif args.t:
     title_ = Search()
     title_.title(args.t)
-
-if args.p:
+elif args.p:
     if int(args.p) > 65535 or int(args.p) < 0:
         print('输入的端口范围不正确')
     else:
         port_ = Search()
         port_.port(args.p)
-
-if args.h and args.p:
+elif args.h and args.p:
         ip_port = Search()
         ip_port.ip_port(args.h,args.p)
