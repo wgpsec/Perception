@@ -72,7 +72,7 @@ optional arguments:
 
 
 
-目前第一版：https://github.com/wgpsec/Perception
+***REMOVED***
 
 ## 要求能做到的功能
 
