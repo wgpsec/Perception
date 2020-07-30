@@ -60,20 +60,6 @@ optional arguments:
 - ~~和[知识库](https://plat.wgpsec.org/knowledge)对接，便于查看对应的指纹POC和文献~~
 - 自定义输出方式，默认输出是在命令行中，查询完成以后会按照查询时间进行保存，格式为.xls，未来会增加选项，是否输出到命令行。
 
-
-
-***REMOVED***
-
-***REMOVED***
-
-***REMOVED***
-
-***REMOVED***
-
-
-
-***REMOVED***
-
 ## 要求能做到的功能
 
 1. ~~用户可以按照自定义的组合（city、reason、title、ip、ports）进行查询，现有的只能做到某一个参数的查询~~
