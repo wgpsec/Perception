@@ -4,3 +4,4 @@ target
 venv
 user_token.txt
 pageSize.txt
+*.xls
