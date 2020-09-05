@@ -1,7 +1,7 @@
 <h1 align="center">Perception 🚀</h1>
 
 <p>
-  <img src="https://img.shields.io/badge/Language-Python2.x/3.x-blue" />
+  <img src="https://img.shields.io/badge/Language-Python3.x-blue" />
   <img src="https://img.shields.io/badge/Version-1.1-blue" />
   <a href="https://plat.wgpsec.org">
     <img src="https://img.shields.io/badge/Dependence-WgpSec%20Plat-green" target="_blank" />
@@ -43,13 +43,20 @@ e.g：`python3 main.py -l xxxxx`
 登陆的时候已经进行验证了，不需要担心是否登陆，会有提示的
 > 信息收集模块
 - 指定目标端口例如`port=4444`
+<br/>
 Usage: `python3 main.py -t web -q port=4444`
 - 指定目标城市例如武汉
+<br/>
 Usage: `python3 main.py -t web -q  city=武汉`
 > 知识库模块
 - 指定关键字例如工具
+<br/>
 Usage: `python3 main.py -k 工具`
 
+## 👍运行截图
+![](./Image/screen-shot1.png)
+![](./Image/screen-shot2.png)
+![](./Image/screen-shot3.png)
 ## ⚡️特性
 
 - 支持以城市名、主机IP、网站标题、指定端口为搜索条件
