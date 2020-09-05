@@ -44,14 +44,12 @@ e.g：`python3 main.py -l xxxxx`
 > 信息收集模块
 - 指定目标端口例如`port=4444`
 <br/>
-Usage: `python3 main.py -t web -q port=4444`
+`python3 main.py -t web -q port=4444`
 - 指定目标城市例如武汉
-<br/>
-Usage: `python3 main.py -t web -q  city=武汉`
+ `python3 main.py -t web -q  city=武汉`
 > 知识库模块
 - 指定关键字例如工具
-<br/>
-Usage: `python3 main.py -k 工具`
+`python3 main.py -k 工具`
 
 ## 👍运行截图
 ![](./Image/screen-shot1.png)
