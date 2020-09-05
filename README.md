@@ -43,7 +43,6 @@ e.g：`python3 main.py -l xxxxx`
 登陆的时候已经进行验证了，不需要担心是否登陆，会有提示的
 > 信息收集模块
 - 指定目标端口例如`port=4444`
-<br/>
 `python3 main.py -t web -q port=4444`
 - 指定目标城市例如武汉
  `python3 main.py -t web -q  city=武汉`
