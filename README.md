@@ -2,7 +2,7 @@
 
 <p>
   <img src="https://img.shields.io/badge/Language-Python2.x/3.x-blue" />
-  <img src="https://img.shields.io/badge/Version-1.0-blue" />
+  <img src="https://img.shields.io/badge/Version-1.1-blue" />
   <a href="https://plat.wgpsec.org">
     <img src="https://img.shields.io/badge/Dependence-WgpSec%20Plat-green" target="_blank" />
   </a>
@@ -11,7 +11,7 @@
 > 基于狼组安全服务(社区)平台API打造的一款在线信息收集程序
 
 ## 🚀 开始使用
-1. 不需要安装任何依赖
+1. 不需要安装任何依赖（全新Python环境下需要安装requests: `pip install requests`）
 2. 运行程序
 ```
 python3 main.py -h 
