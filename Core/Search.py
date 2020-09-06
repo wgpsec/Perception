@@ -1,7 +1,7 @@
+import csv
 import os
 import configparser
 import sys
-
 import requests
 
 class Search(object):
@@ -31,7 +31,7 @@ class Search(object):
         }
         return data
 
-    def requests_search_api(self, type,  input_data):
+    def requests_search_api(self, type, input_data, export_filename):
         search_api_url = self.search_api_url
         user_token = self.get_user_token()
         headers = {
@@ -49,38 +49,66 @@ class Search(object):
                 print('\033[33m[WARN]\033[0m 未查询到信息!')
                 sys.exit(0)
             print('\033[32m[SUCC]\033[0m 查询成功')
-            self.web_print_data(search_info)
+            print('\033[33m[INFO]\033[0m 查询结果将保存至: %s' % ('./Output/' + export_filename))
+            self.web_print_data(search_info, export_filename)
         else:
             search_info = requests_res['data']['wsPortInfoDtoList']['wsPortInfoDtos']
             if len(search_info) == 0:
                 print('\033[33m[WARN]\033[0m 未查询到信息!')
                 sys.exit(0)
             print('\033[32m[SUCC]\033[0m 查询成功')
-            self.host_print_data(search_info)
+            print('\033[33m[INFO]\033[0m 查询结果将保存至: %s' % ('./Output/' + export_filename))
+            self.host_print_data(search_info, export_filename)
         # print(search_info)
 
-    def web_print_data(self, search_info):
-        for i in range(0, len(search_info)):
-            if search_info[i]['subdomainTitle'] == None:
-                search_info[i]['subdomainTitle'] = 'Unknow'
-            if search_info[i]['subdomainBanner'] == None:
-                search_info[i]['subdomainBanner'] = 'Unknow'
-            print('\033[34m[INFO] \033[0m' +
-                  'Title: ' + search_info[i]['subdomainTitle'],
-                  'Subdomain: ' + search_info[i]['subdomain'],
-                  'IP_ADDR: ' + search_info[i]['ipAdd'],
-                  'Web servers: ' + search_info[i]['subdomainBanner'])
+    def web_print_data(self, search_info, export_filename):
+        with open('Output/%s' % export_filename, 'a', newline='') as csvfile:
+            fieldnames = ['网站标题', '域名', 'IP地址', 'Web容器']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for i in range(0, len(search_info)):
+                if search_info[i]['subdomainTitle'] == None:
+                    search_info[i]['subdomainTitle'] = 'Unknow'
+                if search_info[i]['subdomainBanner'] == None:
+                    search_info[i]['subdomainBanner'] = 'Unknow'
+                print('\033[34m[INFO] \033[0m' +
+                      '\033[33mTitle:\033[0m[' + search_info[i]['subdomainTitle'] + ']',
+                      '\033[33mSubdomain:\033[0m[' + search_info[i]['subdomain'] + ']',
+                      '\033[33mIPADDR:\033[0m[' + search_info[i]['ipAdd'] + ']',
+                      '\033[33mWeb servers:\033[0m[' + search_info[i]['subdomainBanner'] + ']')
+                result = {
+                    '网站标题': search_info[i]['subdomainTitle'],
+                    '域名': search_info[i]['subdomain'],
+                    'IP地址': search_info[i]['ipAdd'],
+                    'Web容器': search_info[i]['subdomainBanner']
+                }
+                writer.writerow(result)
+        csvfile.close()
 
-    def host_print_data(self, search_info):
-        for i in range(0, len(search_info)):
-            if search_info[i]['product'] == '':
-                search_info[i]['product'] = 'Unknow'
-            print('\033[34m[INFO] \033[0m' +
-                  'Subdomain: ' + search_info[i]['subdomain'],
-                  'IP_ADDR: ' + search_info[i]['ipAdd'],
-                  'Port:' + str(search_info[i]['port']),  # type: int
-                  'Service: ' + search_info[i]['service'],
-                  'Product: ' + search_info[i]['product'])
+    def host_print_data(self, search_info, export_filename):
+        with open('Output/%s' % export_filename, 'a', newline='') as csvfile:
+            fieldnames = ['域名', 'IP地址', '端口', '服务', '产品']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for i in range(0, len(search_info)):
+                if search_info[i]['product'] == '':
+                    search_info[i]['product'] = 'Unknow'
+                print('\033[34m[INFO] \033[0m' +
+                      '\033[33mSubdomain:\033[0m[' + search_info[i]['subdomain'] + ']',
+                      '\033[33mIPADDR:\033[0m[' + search_info[i]['ipAdd'] + ']',
+                      '\033[33mPort:\033[0m[' + str(search_info[i]['port']) + ']',  # type: int
+                      '\033[33mService:\033[0m[' + search_info[i]['service'] + ']',
+                      '\033[33mProduct:\033[0m[' + search_info[i]['product'] + ']')
+                result = {
+                    '域名': search_info[i]['subdomain'],
+                    'IP地址': search_info[i]['ipAdd'],
+                    '端口': search_info[i]['port'],
+                    '服务': str(search_info[i]['service']),
+                    '产品': search_info[i]['product']
+                }
+                writer.writerow(result)
+        csvfile.close()
+
     def kownledge_search(self, keyword):
         data = {
             "pageNo": 1,
