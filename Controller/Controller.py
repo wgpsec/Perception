@@ -15,10 +15,10 @@ class WgpIG(object):
     def _login(self, username):
         self.login.verify(username)
 
-    def _search(self, type, query, keyword, export):
+    def _search(self, type, pagenum, query, keyword, export):
         search = self.search
         if type != '' and query != '':
-            search.requests_search_api(type, query, export)
+            search.requests_search_api(type, pagenum, query, export)
         if keyword != '':
             search.requests_kownledge_search_api(keyword)
 
@@ -27,14 +27,14 @@ class WgpIG(object):
         if url != None or url != '':
             wolfscan.requests_create_wolfscan_api(url)
 
-    def Start(self, username, url, type, query, keyword, export):
+    def Start(self, username, url, pagenum, type, query, keyword, export):
         if not os.path.exists('Output/'):
             os.mkdir('Output/')
         if not self.check.run():
             self._login(username)
-        self._search(type, query, keyword='', export=export)
+        self._search(type=type, query=query,pagenum=pagenum, keyword='', export=export)
         if keyword != '':
-            self._search(type='', query='', keyword=keyword, export=export)
+            self._search(type='', query='', pagenum=pagenum, keyword=keyword, export=export)
         if url != None and url != '':
             self._createwolfscan(url)
 

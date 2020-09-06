@@ -25,23 +25,23 @@ class Search(object):
                 sys.exit(0)
         return user_token
 
-    def search_data(self, type, input_data):
+    def search_data(self, page_num, type, input_data):
         data = {
-            "pageNo": 1,
-            "pageSize": 100,
+            "pageNo": page_num,
+            "pageSize": 10,
             "query": input_data,
             "type": type
         }
         return data
 
-    def requests_search_api(self, type, input_data, export_filename):
+    def requests_search_api(self, type, page_num, input_data, export_filename):
         search_api_url = self.search_api_url
         user_token = self.get_user_token()
         headers = {
             "authorization": user_token,
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"
         }
-        search_data = self.search_data(type=type, input_data=input_data)
+        search_data = self.search_data(type=type, page_num=page_num, input_data=input_data)
         requests_res = requests.post(url=search_api_url, headers=headers, json=search_data).json()
         if requests_res['code'] == 4018:
             print("\033[31m[ERRO]\033[0m " + requests_res['msg'])
