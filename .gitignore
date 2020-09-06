@@ -140,3 +140,5 @@ cython_debug/
 #　vscode
 .idea
 .vscode
+
+*.DS_Store
