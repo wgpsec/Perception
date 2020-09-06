@@ -14,7 +14,7 @@ def main():
     parser.add_argument('-u', '--url', help='需要添加扫描的域名')
     parser.add_argument('-q', '--query', help='(port|host|title|ip|city)', default='')
     parser.add_argument('-k', '--keyword', help='enable knowledge api', default='')
-    parser.add_argument('-e', '--export', help='查询结果保存的文件路径', default='test.csv')
+    parser.add_argument('-e', '--export', help='查询结果保存的文件路径', default='')
     args = parser.parse_args()
     username = args.login
     type = args.type
