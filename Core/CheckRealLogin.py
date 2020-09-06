@@ -1,5 +1,3 @@
-import sys
-
 import requests
 import configparser
 import os
@@ -43,6 +41,3 @@ class Check(object):
                 print('\033[33m[WARN]\033[0m 您已登陆，无须继续登陆')
                 return True
 
-
-# a = Check()
-# a.run()

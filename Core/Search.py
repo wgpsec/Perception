@@ -2,7 +2,10 @@ import csv
 import os
 import configparser
 import sys
+import time
+
 import requests
+
 
 class Search(object):
 
@@ -50,6 +53,7 @@ class Search(object):
                 sys.exit(0)
             print('\033[32m[SUCC]\033[0m 查询成功')
             print('\033[33m[INFO]\033[0m 查询结果将保存至: %s' % ('./Output/' + export_filename))
+            time.sleep(2)
             self.web_print_data(search_info, export_filename)
         else:
             search_info = requests_res['data']['wsPortInfoDtoList']['wsPortInfoDtos']
@@ -58,6 +62,7 @@ class Search(object):
                 sys.exit(0)
             print('\033[32m[SUCC]\033[0m 查询成功')
             print('\033[33m[INFO]\033[0m 查询结果将保存至: %s' % ('./Output/' + export_filename))
+            time.sleep(2)
             self.host_print_data(search_info, export_filename)
         # print(search_info)
 
@@ -136,7 +141,7 @@ class Search(object):
             knowledge_info = knowledge_api_res_json['data']['platPostSVos']
             for i in range(0, len(knowledge_info)):
                 link = 'https://plat.wgpsec.org/knowledge/view/%s' % knowledge_info[i]['postId']
-                print('\033[34m[INFO]\033[0m ' + 'Title: ' + knowledge_info[i]['postTitle'], 'Link: ' + link)
+                print('\033[34m[INFO]\033[0m ' + '\033[33mTitle:\033[0m[' + knowledge_info[i]['postTitle'] + ']', '\033[33mLink:\033[0m[' + link + ']')
         except:
             knowledge_api_res_json = knowledge_api_res.json()
             print('\033[31m[ERRO]\033[0m ' + knowledge_api_res_json['msg'])
