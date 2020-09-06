@@ -67,6 +67,7 @@ e.g：`python3 main.py -l xxxxx`
 ![](./Image/screen-shot2.png)
 ![](./Image/screen-shot3.png)
 ![](./Image/screen-shot4.png)
+![](./Image/screen-shot5.png)
 ## ⚡️特性
 
 - 支持以城市名、主机IP、网站标题、指定端口为搜索条件
